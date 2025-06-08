@@ -1,0 +1,20 @@
+---
+description:
+globs: prisma/**/*
+alwaysApply: false
+---
+## Database
+
+- **Schema Changes**: ALWAYS create migration files when changing the Prisma schema. Use `pnpm db:migrate` to create migrations. Provide descriptive migration names that explain the changes being made.
+- **Indexes**: When adding unsupported indexes, create a dummy `@@index` in the prisma schema and alter the migration to be the correct type. Make sure the dummy index uses the correct name
+- **Applying Migrations**: After checking and potentially altering migrations, you can apply them using `pnpm db:migrate:deploy`
+
+
+## Database Schema
+
+The Prisma schema includes a complete authentication system. Do not change any of these:
+
+- **User** - User accounts with email verification
+- **Session** - User sessions with expiration and metadata
+- **Account** - OAuth and credential accounts
+- **Verification** - Email verification and password reset tokens

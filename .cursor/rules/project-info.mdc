@@ -1,0 +1,92 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Project: Next.js 15 App Router with Better Auth and TypeScript
+
+## Project Information
+
+## Tech Stack
+
+- Next.js 15 (App Router)
+- TypeScript
+- Better Auth for authentication
+- Prisma ORM with PostgreSQL
+- Tanstack Query as an async state manager, integrated with tRPC
+- Kysely query builder for data types unsupported by Prisma (integrated with Prisma via `prisma-extension-kysely`)
+- Tailwind 4
+- Shadcn/ui (All components are pre-installed)
+- pnpm as package manager. Do NOT use npm.
+- Eslint for linting
+- Prettier for formatting
+- Zod v4 for schema validation
+
+
+## Code Style & Conventions
+
+- Always include proper TypeScript types if possible, avoid using `any`
+- Use server components by default, only use "use client" when necessary
+- For UI, use shadcn/ui components + tailwind classes. Never create custom CSS classes
+- When checking changes, you can use `pnpm lint` and `pnpm typecheck`. Avoid running `pnpm dev`, assume the dev server is already running
+- When styling components, use relative colors (e.g. `foreground`, `background`, `destructive`) over colors
+
+
+## File Structure
+
+- `/src/app/` - Next.js app router pages and layouts
+- `/src/app/api/` - Api endpoints. This only contains the better auth and a tRPC endpoint. Do not edit these files unless explicitly instructed
+- `/src/server/api/` - tRPC server side setup.
+- `/src/server/api/*` - tRPC routers. These contain the actual endpoints
+- `/src/lib/` - Utility functions and configurations
+- `/src/lib/auth/` - Better Auth configuration
+- `/src/lib/db/` - Kysely type definitions generated from Prisma schema
+- `/src/server/` - Server-side endpoints and database
+- `/src/components/` - Reusable React components
+- `/src/components/ui/` - Shadcn/ui components
+
+
+## Better Auth
+
+- Import auth instance from `~/lib/auth/server` for server-side operations
+- Import auth client from `~/lib/auth/client.ts` for client-side operations
+- Use `auth.api.getSession()` with headers for server-side session checks
+- Use `authClient.useSession()` for client-side session management
+
+
+## Database
+
+- Use Prisma for database operations if maintaining type safety is possible, otherwise use Kysely
+- Import db from `~/server/db.ts`
+- **Kysely Integration**: Access type-safe SQL query builder via `db.$kysely` for advanced queries
+- Kysely types are auto-generated from Prisma schema to `~/src/lib/db/types.ts`
+
+
+## Import Preferences
+
+- Use `~/` path alias for src directory imports
+- Use absolute imports over relative when possible
+
+
+## Error Handling
+
+- Always handle errors gracefully
+- Use proper TypeScript error types
+- Provide meaningful error messages
+
+
+## Comments
+
+- Do not use too many comments
+- Don't explain simple code
+- Add comments for things that aren't very human readable, such as regex
+
+
+### Key Configuration Files
+
+- `tsconfig.json` - TypeScript configuration with path mapping (`~/*`)
+- `next.config.ts` - Next.js configuration (minimal setup)
+- `postcss.config.mjs` - PostCSS with Tailwind plugin
+- `eslint.config.mjs` - ESLint flat config format
+- `` - Database schema with auth models
+
