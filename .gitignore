@@ -24,6 +24,7 @@
 .DS_Store
 *.pem
 /generated
+convex/_generated
 
 # debug
 npm-debug.log*

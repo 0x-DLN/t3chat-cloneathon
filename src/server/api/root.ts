@@ -1,4 +1,6 @@
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
+import { apiKeyRouter } from "~/server/api/routers/api-key";
+import { chatRouter } from "~/server/api/routers/chat";
 
 /**
  * This is the primary router for your server.
@@ -6,7 +8,8 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  // Add new routers here
+  apiKey: apiKeyRouter,
+  chat: chatRouter,
 });
 
 export type AppRouter = typeof appRouter;

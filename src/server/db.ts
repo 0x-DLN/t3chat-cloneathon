@@ -5,7 +5,7 @@ import {
   PostgresQueryCompiler,
 } from "kysely";
 import kyselyExtension from "prisma-extension-kysely";
-import { PrismaClient } from "~/../generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import type { DB } from "~/lib/db/types";
 
 import { env } from "~/env";

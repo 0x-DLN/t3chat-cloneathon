@@ -7,9 +7,11 @@
  * need to use are documented accordingly near the end.
  */
 import { initTRPC, TRPCError } from "@trpc/server";
+import { ConvexHttpClient } from "convex/browser";
 import { headers } from "next/headers";
 import superjson from "superjson";
 import { ZodError } from "zod";
+import { env } from "~/env";
 import { auth } from "~/lib/auth/server";
 
 import { db } from "~/server/db";
@@ -33,10 +35,13 @@ export const createTRPCContext = async () => {
     headers: reqHeaders,
   });
 
+  const convex = new ConvexHttpClient(env.NEXT_PUBLIC_CONVEX_URL);
+
   return {
     headers: reqHeaders,
     db,
     session,
+    convex,
   };
 };
 
@@ -128,5 +133,5 @@ export const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
     });
   }
 
-  return next({ ctx });
+  return next({ ctx: { ...ctx, session: ctx.session } });
 });
