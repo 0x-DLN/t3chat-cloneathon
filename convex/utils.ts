@@ -15,3 +15,15 @@ export function checkSecret(secret: string) {
     throw new Error("Unauthorized: Invalid secret.");
   }
 }
+
+export function calculateOrder(prevOrder?: number, nextOrder?: number) {
+  if (prevOrder && nextOrder) {
+    return (prevOrder + nextOrder) / 2;
+  } else if (prevOrder) {
+    return prevOrder + 1;
+  } else if (nextOrder) {
+    return nextOrder - 1;
+  } else {
+    return 1;
+  }
+}
