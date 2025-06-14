@@ -5,7 +5,7 @@ import {
   mutation,
   query,
 } from "./_generated/server";
-import { calculateOrder, checkAuth, checkSecret } from "./utils";
+import { calculateOrder, checkAuth } from "./utils";
 
 export const getBlocksUser = query({
   args: { conversationId: v.id("conversations") },
@@ -109,18 +109,21 @@ export const createAssistantBlock = internalMutation({
 export const updateBlockUser = mutation({
   args: {
     blockId: v.id("blocks"),
-    conversationId: v.id("conversations"),
     content: v.any(),
   },
   handler: async (ctx, args) => {
     const identity = await checkAuth(ctx.auth);
 
     const block = await ctx.db.get(args.blockId);
-    const conversation = await ctx.db.get(args.conversationId);
+    if (!block) {
+      throw new Error("Block not found");
+    }
+    const conversation = await ctx.db.get(block.conversationId);
+    if (!conversation) {
+      throw new Error("Conversation not found");
+    }
     if (
-      !block ||
-      !conversation ||
-      block.conversationId !== args.conversationId ||
+      block.conversationId !== conversation._id ||
       conversation.userId !== identity.subject
     ) {
       throw new Error("Unauthorized");
@@ -187,10 +190,23 @@ export const toggleExclusion = mutation({
   args: {
     blockId: v.id("blocks"),
     isExcluded: v.boolean(),
-    secret: v.string(),
   },
   handler: async (ctx, args) => {
-    checkSecret(args.secret);
+    const identity = await checkAuth(ctx.auth);
+    const block = await ctx.db.get(args.blockId);
+    if (!block) {
+      throw new Error("Block not found");
+    }
+    const conversation = await ctx.db.get(block.conversationId);
+    if (!conversation) {
+      throw new Error("Conversation not found");
+    }
+    if (
+      block.conversationId !== conversation._id ||
+      conversation.userId !== identity.subject
+    ) {
+      throw new Error("Unauthorized");
+    }
 
     await ctx.db.patch(args.blockId, {
       isExcluded: args.isExcluded,

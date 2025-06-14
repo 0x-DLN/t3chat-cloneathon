@@ -1,20 +1,20 @@
-import { remark } from "remark";
-import remarkHtml from "remark-html";
+import { marked } from "marked";
+import TurndownService from "turndown";
 import { generateHTML, generateJSON } from "@tiptap/html";
 import StarterKit from "@tiptap/starter-kit";
 import { getSchema, type JSONContent } from "@tiptap/core";
 import { MarkdownSerializer } from "prosemirror-markdown";
 
 export async function markdownToTiptapJson(markdown: string) {
-  const html = await remark().use(remarkHtml).process(markdown);
+  const html = await marked(markdown);
   const tiptapJson = generateJSON(html.toString(), [StarterKit.configure()]);
   return tiptapJson;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function tiptapJsonToMarkdown(json: any) {
-  const html = generateHTML(json, starterkitExtensions);
-  const markdown = await remark().use(remarkHtml).process(html);
+  const html = generateHTML(json, [StarterKit]);
+  const markdown = turndownService.turndown(html);
   return markdown.toString();
 }
 
@@ -34,9 +34,9 @@ export function convertTiptapJsonToMarkdown(json: JSONContent): string {
   }
 }
 
-const starterkitExtensions = [StarterKit.configure()];
+const tiptapSchema = getSchema([StarterKit]);
 
-const tiptapSchema = getSchema(starterkitExtensions);
+const turndownService = new TurndownService();
 
 const serializer = new MarkdownSerializer(
   {
