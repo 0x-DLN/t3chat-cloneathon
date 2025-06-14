@@ -74,6 +74,35 @@ export const createUserBlock = mutation({
   },
 });
 
+export const deleteBlock = mutation({
+  args: {
+    blockId: v.id("blocks"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await checkAuth(ctx.auth);
+    const block = await ctx.db.get(args.blockId);
+    if (!block) {
+      throw new Error("Block not found");
+    }
+    const conversation = await ctx.db.get(block.conversationId);
+    if (!conversation) {
+      throw new Error("Conversation not found");
+    }
+    if (
+      block.conversationId !== conversation._id ||
+      conversation.userId !== identity.subject
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    await ctx.db.delete(args.blockId);
+
+    return {
+      blockId: args.blockId,
+    };
+  },
+});
+
 export const createAssistantBlock = internalMutation({
   args: {
     conversationId: v.id("conversations"),

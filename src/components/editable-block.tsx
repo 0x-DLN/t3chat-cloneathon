@@ -1,28 +1,18 @@
 import { useEditor, EditorContent } from "@tiptap/react";
-import type { Editor, JSONContent } from "@tiptap/core";
+import type { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import { useMutation } from "convex/react";
 import { api } from "~/convex/_generated/api";
-import type { Id } from "~/convex/_generated/dataModel";
+import type { Doc, Id } from "~/convex/_generated/dataModel";
 import { Placeholder } from "@tiptap/extension-placeholder";
 import { useCallback, useState } from "react";
 import { cn } from "~/lib/utils";
 import { Button } from "./ui/button";
-import { Eye, EyeOff, Plus } from "lucide-react";
+import { Eye, EyeOff, Plus, Trash } from "lucide-react";
 import { Checkbox } from "./ui/checkbox";
 
-type BlockData = {
-  _id: Id<"blocks">;
-  author: "user" | "assistant";
-  content?: JSONContent;
-  streamingContent?: string;
-  isStreaming: boolean;
-  isExcluded: boolean;
-  order: number;
-};
-
 type EditableBlockProps = {
-  block: BlockData;
+  block: Doc<"blocks">;
   isSelected: boolean;
   onSelect: (id: Id<"blocks">) => void;
   onInsertBefore: (order: number) => void;
@@ -39,6 +29,21 @@ export function EditableBlock({
   console.count("Render EditableBlock");
   const [isEditing, setIsEditing] = useState(false);
   const updateBlock = useMutation(api.blocks.updateBlockUser);
+  const deleteBlock = useMutation(api.blocks.deleteBlock).withOptimisticUpdate(
+    (localstore, args) => {
+      const blocks = localstore.getQuery(api.blocks.getBlocksUser, {
+        conversationId: block.conversationId,
+      });
+      const newBlocks = blocks?.filter((block) => block._id !== args.blockId);
+      localstore.setQuery(
+        api.blocks.getBlocksUser,
+        {
+          conversationId: block.conversationId,
+        },
+        newBlocks
+      );
+    }
+  );
   const toggleExclude = useMutation(api.blocks.toggleExclusion);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
@@ -126,6 +131,17 @@ export function EditableBlock({
         ) : (
           <EyeOff className="w-4 h-4" />
         )}
+      </Button>
+
+      {/* Delete button */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => deleteBlock({ blockId: block._id })}
+        className="absolute top-2 right-10 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+        title="Delete block"
+      >
+        <Trash className="w-4 h-4" />
       </Button>
 
       {/* Author indicator */}
