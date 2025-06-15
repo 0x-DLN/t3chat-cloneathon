@@ -23,12 +23,11 @@ type EditableBlockProps = {
   onSelect: (id: Id<"blocks">) => void;
   onInsertAfter: (order: number) => void;
   onDeleteBlock: (blockId: Id<"blocks">, key: "Backspace" | "Delete") => void;
-  onArrowNavigation?: (
-    currentBlockId: Id<"blocks">,
+  onNavigateBlock: (
+    blockId: Id<"blocks">,
     direction: "up" | "down" | "left" | "right",
-    currentPosition?: number,
     visualOffset?: number
-  ) => boolean;
+  ) => void;
   registerRef: (
     blockId: Id<"blocks">,
     ref: {
@@ -52,7 +51,7 @@ export const EditableBlock = forwardRef<
       onSelect,
       onInsertAfter,
       onDeleteBlock,
-      onArrowNavigation,
+      onNavigateBlock,
       registerRef,
     },
     ref
@@ -77,24 +76,6 @@ export const EditableBlock = forwardRef<
     });
     const toggleExclude = useMutation(api.blocks.toggleExclusion);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-
-    // Helper function to calculate visual offset of cursor position
-    const getVisualOffset = useCallback(
-      (editorInstance: Editor, position: number): number => {
-        if (!editorInstance.view.dom) return 0;
-
-        try {
-          const coords = editorInstance.view.coordsAtPos(position);
-          const editorRect = editorInstance.view.dom.getBoundingClientRect();
-
-          // Return the relative X position within the editor
-          return coords.left - editorRect.left;
-        } catch {
-          return 0;
-        }
-      },
-      []
-    );
 
     // Helper function to find position from visual offset
     const getPositionFromVisualOffset = useCallback(
@@ -139,6 +120,79 @@ export const EditableBlock = forwardRef<
             const { selection } = state;
             const { $from } = selection;
 
+            // Helper function to get visual offset of current cursor position
+            const getCurrentVisualOffset = (): number => {
+              try {
+                const coords = view.coordsAtPos($from.pos);
+                const editorRect = view.dom.getBoundingClientRect();
+                return coords.left - editorRect.left;
+              } catch {
+                return 0;
+              }
+            };
+
+            // Handle Arrow Up - move to previous block only if at top of textblock
+            if (
+              event.key === "ArrowUp" &&
+              !event.shiftKey &&
+              !event.ctrlKey &&
+              !event.metaKey
+            ) {
+              // Check if we're at the visual top of the textblock
+              if (view.endOfTextblock("up")) {
+                event.preventDefault();
+                const visualOffset = getCurrentVisualOffset();
+                onNavigateBlock(block._id, "up", visualOffset);
+                return true;
+              }
+            }
+
+            // Handle Arrow Down - move to next block only if at bottom of textblock
+            if (
+              event.key === "ArrowDown" &&
+              !event.shiftKey &&
+              !event.ctrlKey &&
+              !event.metaKey
+            ) {
+              // Check if we're at the visual bottom of the textblock
+              if (view.endOfTextblock("down")) {
+                event.preventDefault();
+                const visualOffset = getCurrentVisualOffset();
+                onNavigateBlock(block._id, "down", visualOffset);
+                return true;
+              }
+            }
+
+            // Handle Arrow Left - move to end of previous block if at start
+            if (
+              event.key === "ArrowLeft" &&
+              !event.shiftKey &&
+              !event.ctrlKey &&
+              !event.metaKey
+            ) {
+              // Check if we're at the visual start of the textblock
+              if (view.endOfTextblock("left")) {
+                event.preventDefault();
+                onNavigateBlock(block._id, "left");
+                return true;
+              }
+            }
+
+            // Handle Arrow Right - move to start of next block if at end
+            if (
+              event.key === "ArrowRight" &&
+              !event.shiftKey &&
+              !event.ctrlKey &&
+              !event.metaKey
+            ) {
+              // Check if we're at the visual end of the textblock
+              if (view.endOfTextblock("right")) {
+                event.preventDefault();
+                onNavigateBlock(block._id, "right");
+                return true;
+              }
+            }
+
             // Handle Enter key - create new block
             if (event.key === "Enter" && !event.shiftKey) {
               // Check if we're at the end of the block
@@ -158,59 +212,6 @@ export const EditableBlock = forwardRef<
                 onDeleteBlock(block._id, event.key);
                 deleteBlock({ blockId: block._id });
                 return true;
-              }
-            }
-
-            // Handle Arrow key navigation between blocks
-            if (
-              onArrowNavigation &&
-              editor &&
-              ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(
-                event.key
-              )
-            ) {
-              const currentPos = $from.pos;
-              const docStart = 1;
-              const docEnd = state.doc.content.size - 1;
-
-              switch (event.key) {
-                case "ArrowUp":
-                  // Always navigate to previous block
-                  event.preventDefault();
-                  const visualOffsetUp = getVisualOffset(editor, currentPos);
-                  return onArrowNavigation(
-                    block._id,
-                    "up",
-                    currentPos,
-                    visualOffsetUp
-                  );
-
-                case "ArrowDown":
-                  // Always navigate to next block
-                  event.preventDefault();
-                  const visualOffsetDown = getVisualOffset(editor, currentPos);
-                  return onArrowNavigation(
-                    block._id,
-                    "down",
-                    currentPos,
-                    visualOffsetDown
-                  );
-
-                case "ArrowLeft":
-                  // If we're at the very beginning, navigate to previous block
-                  if (currentPos <= docStart) {
-                    event.preventDefault();
-                    return onArrowNavigation(block._id, "left", currentPos);
-                  }
-                  break;
-
-                case "ArrowRight":
-                  // If we're at the very end, navigate to next block
-                  if (currentPos >= docEnd) {
-                    event.preventDefault();
-                    return onArrowNavigation(block._id, "right", currentPos);
-                  }
-                  break;
               }
             }
 

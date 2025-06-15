@@ -92,67 +92,49 @@ export function BlockList({ conversationId }: { conversationId: string }) {
     [blocks]
   );
 
-  const handleArrowNavigation = useCallback(
+  const handleNavigateBlock = useCallback(
     (
-      currentBlockId: Id<"blocks">,
+      blockId: Id<"blocks">,
       direction: "up" | "down" | "left" | "right",
-      currentPosition?: number,
       visualOffset?: number
     ) => {
-      if (!blocks) return false;
+      if (!blocks) return;
 
-      const blockIndex = blocks.findIndex(
-        (block) => block._id === currentBlockId
-      );
-      if (blockIndex === -1) return false;
+      const blockIndex = blocks.findIndex((block) => block._id === blockId);
+      if (blockIndex === -1) return;
 
       let targetBlockId: Id<"blocks"> | null = null;
-      let targetPosition: "start" | "end" | number = "start";
+      let position: "start" | "end" = "start";
 
-      switch (direction) {
-        case "up":
-          if (blockIndex > 0) {
-            targetBlockId = blocks[blockIndex - 1]._id;
-            // For up/down, we'll use the visual offset to find the best position
-            targetPosition = visualOffset !== undefined ? visualOffset : "end";
-          }
-          break;
-        case "down":
-          if (blockIndex < blocks.length - 1) {
-            targetBlockId = blocks[blockIndex + 1]._id;
-            targetPosition =
-              visualOffset !== undefined ? visualOffset : "start";
-          }
-          break;
-        case "left":
-          if (blockIndex > 0) {
-            targetBlockId = blocks[blockIndex - 1]._id;
-            targetPosition = "end";
-          }
-          break;
-        case "right":
-          if (blockIndex < blocks.length - 1) {
-            targetBlockId = blocks[blockIndex + 1]._id;
-            targetPosition = "start";
-          }
-          break;
+      if (direction === "up" && blockIndex > 0) {
+        targetBlockId = blocks[blockIndex - 1]._id;
+        position = "end";
+      } else if (direction === "down" && blockIndex < blocks.length - 1) {
+        targetBlockId = blocks[blockIndex + 1]._id;
+        position = "start";
+      } else if (direction === "left" && blockIndex > 0) {
+        targetBlockId = blocks[blockIndex - 1]._id;
+        position = "end";
+      } else if (direction === "right" && blockIndex < blocks.length - 1) {
+        targetBlockId = blocks[blockIndex + 1]._id;
+        position = "start";
       }
 
       if (targetBlockId) {
         setTimeout(() => {
           const blockRef = blockRefs.current.get(targetBlockId!);
           if (blockRef) {
-            if (typeof targetPosition === "number") {
-              blockRef.focusAtVisualOffset(targetPosition);
+            if (
+              (direction === "up" || direction === "down") &&
+              visualOffset !== undefined
+            ) {
+              blockRef.focusAtVisualOffset(visualOffset);
             } else {
-              blockRef.focus(targetPosition);
+              blockRef.focus(position);
             }
           }
         }, 0);
-        return true;
       }
-
-      return false;
     },
     [blocks]
   );
@@ -247,7 +229,7 @@ export function BlockList({ conversationId }: { conversationId: string }) {
                   onSelect={handleSelectBlock}
                   onInsertAfter={(order) => handleInsertBlock(order)}
                   onDeleteBlock={handleDeleteBlock}
-                  onArrowNavigation={handleArrowNavigation}
+                  onNavigateBlock={handleNavigateBlock}
                   registerRef={registerBlockRef}
                 />
               ))}
