@@ -61,7 +61,6 @@ export const EditableBlock = forwardRef<
   ) => {
     console.count("Render EditableBlock");
     const [isEditing, setIsEditing] = useState(false);
-    const [isHovered, setIsHovered] = useState(false);
     const updateBlock = useMutation(api.blocks.updateBlockUser);
     const deleteBlock = useMutation(
       api.blocks.deleteBlock
@@ -318,8 +317,6 @@ export const EditableBlock = forwardRef<
           isSelected && "bg-blue-50/50",
           block.isExcluded && "opacity-50"
         )}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
       >
         {/* Main content area */}
         <div className="flex items-start gap-3 px-6">
@@ -329,10 +326,7 @@ export const EditableBlock = forwardRef<
               variant="ghost"
               size="sm"
               onClick={() => onInsertBefore(block.order)}
-              className={cn(
-                "h-6 w-6 p-0 hover:bg-accent transition-opacity duration-200",
-                isHovered ? "opacity-100" : "opacity-0"
-              )}
+              className="h-6 w-6 p-0 hover:bg-accent transition-opacity duration-200 opacity-0 group-hover:opacity-100"
               title="Insert block before"
             >
               <Plus className="w-3 h-3" />
@@ -346,25 +340,18 @@ export const EditableBlock = forwardRef<
           />
 
           {/* Controls */}
-          <div
-            className={cn(
-              "flex items-center gap-1 transition-opacity duration-200 ml-2",
-              isHovered ? "opacity-100" : "opacity-0"
-            )}
-          >
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onSelect(block._id)}
-              className="h-7 w-7 p-0 hover:bg-accent"
+          <div className="flex items-center gap-1 transition-opacity duration-200 ml-2 opacity-0 group-hover:opacity-100">
+            <div
+              className="h-7 w-7 p-0 hover:bg-accent flex items-center justify-center rounded-md"
               title="Select block"
+              onClick={() => onSelect(block._id)}
             >
               <Checkbox
                 checked={isSelected}
                 onChange={() => {}}
                 className="pointer-events-none"
               />
-            </Button>
+            </div>
 
             <Button
               variant="ghost"
@@ -376,9 +363,9 @@ export const EditableBlock = forwardRef<
               }
             >
               {block.isExcluded ? (
-                <Eye className="w-3.5 h-3.5" />
-              ) : (
                 <EyeOff className="w-3.5 h-3.5" />
+              ) : (
+                <Eye className="w-3.5 h-3.5" />
               )}
             </Button>
 
