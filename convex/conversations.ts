@@ -5,7 +5,7 @@ import {
   query,
 } from "./_generated/server";
 import { v } from "convex/values";
-import { checkAuth, checkSecret } from "./utils";
+import { checkAuth } from "./utils";
 
 export const create = internalMutation({
   args: {
@@ -35,6 +35,24 @@ export const getUserConversations = query({
       .withIndex("by_user", (q) => q.eq("userId", identity.subject))
       .order("desc")
       .collect();
+  },
+});
+
+export const getConversation = query({
+  args: { conversationId: v.id("conversations") },
+  handler: async (ctx, args) => {
+    const identity = await checkAuth(ctx.auth);
+
+    const conversation = await ctx.db.get(args.conversationId);
+    if (!conversation) {
+      return null;
+    }
+
+    if (conversation.userId !== identity.subject) {
+      throw new Error("Unauthorized");
+    }
+
+    return conversation;
   },
 });
 
@@ -83,10 +101,18 @@ export const setTitle = mutation({
   args: {
     conversationId: v.id("conversations"),
     title: v.string(),
-    secret: v.string(),
   },
   handler: async (ctx, args) => {
-    checkSecret(args.secret);
+    const identity = await checkAuth(ctx.auth);
+
+    const conversation = await ctx.db.get(args.conversationId);
+    if (!conversation) {
+      throw new Error("Conversation not found");
+    }
+
+    if (conversation.userId !== identity.subject) {
+      throw new Error("Unauthorized");
+    }
 
     await ctx.db.patch(args.conversationId, {
       title: args.title,
