@@ -21,7 +21,6 @@ type EditableBlockProps = {
   block: Doc<"blocks">;
   isSelected: boolean;
   onSelect: (id: Id<"blocks">) => void;
-  onInsertBefore: (order: number) => void;
   onInsertAfter: (order: number) => void;
   onDeleteBlock: (blockId: Id<"blocks">, key: "Backspace" | "Delete") => void;
   onArrowNavigation?: (
@@ -51,7 +50,6 @@ export const EditableBlock = forwardRef<
       block,
       isSelected,
       onSelect,
-      onInsertBefore,
       onInsertAfter,
       onDeleteBlock,
       onArrowNavigation,
@@ -351,9 +349,9 @@ export const EditableBlock = forwardRef<
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => onInsertBefore(block.order)}
+              onClick={() => onInsertAfter(block.order)}
               className="h-6 w-6 p-0 hover:bg-accent transition-opacity duration-200 opacity-0 group-hover:opacity-100"
-              title="Insert block before"
+              title="Insert block after"
             >
               <Plus className="w-3 h-3" />
             </Button>

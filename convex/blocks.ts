@@ -46,8 +46,7 @@ export const createUserBlock = mutation({
     conversationId: v.id("conversations"),
     author: v.literal("user"),
     content: v.optional(v.any()),
-    prevOrder: v.optional(v.number()),
-    nextOrder: v.optional(v.number()),
+    afterOrder: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const identity = await checkAuth(ctx.auth);
@@ -57,7 +56,38 @@ export const createUserBlock = mutation({
       throw new Error("Unauthorized");
     }
 
-    const newOrder = calculateOrder(args.prevOrder, args.nextOrder);
+    let newOrder: number;
+
+    if (args.afterOrder === undefined) {
+      // Creating the first block or at the end
+      const lastBlock = await ctx.db
+        .query("blocks")
+        .withIndex("by_conversation_and_order", (q) =>
+          q.eq("conversationId", args.conversationId)
+        )
+        .order("desc")
+        .first();
+
+      newOrder = lastBlock ? lastBlock.order + 1 : 1;
+    } else {
+      // Find the next block after the specified order
+      const nextBlock = await ctx.db
+        .query("blocks")
+        .withIndex("by_conversation_and_order", (q) =>
+          q.eq("conversationId", args.conversationId)
+        )
+        .filter((q) => q.gt(q.field("order"), args.afterOrder!))
+        .order("asc")
+        .first();
+
+      if (nextBlock) {
+        // Insert between afterOrder and nextBlock.order using fractional indexing
+        newOrder = calculateOrder(args.afterOrder, nextBlock.order);
+      } else {
+        // No next block, just add 1 to the afterOrder
+        newOrder = args.afterOrder + 1;
+      }
+    }
 
     return await ctx.db.insert("blocks", {
       conversationId: args.conversationId,
@@ -107,12 +137,43 @@ export const deleteBlock = mutation({
 export const createAssistantBlock = internalMutation({
   args: {
     conversationId: v.id("conversations"),
-    prevOrder: v.optional(v.number()),
-    nextOrder: v.optional(v.number()),
+    afterOrder: v.optional(v.number()),
     model: v.string(),
   },
   handler: async (ctx, args) => {
-    const newOrder = calculateOrder(args.prevOrder, args.nextOrder);
+    let newOrder: number;
+
+    if (args.afterOrder === undefined) {
+      // Creating at the end
+      const lastBlock = await ctx.db
+        .query("blocks")
+        .withIndex("by_conversation_and_order", (q) =>
+          q.eq("conversationId", args.conversationId)
+        )
+        .order("desc")
+        .first();
+
+      newOrder = lastBlock ? lastBlock.order + 1 : 1;
+    } else {
+      // Find the next block after the specified order
+      const nextBlock = await ctx.db
+        .query("blocks")
+        .withIndex("by_conversation_and_order", (q) =>
+          q.eq("conversationId", args.conversationId)
+        )
+        .filter((q) => q.gt(q.field("order"), args.afterOrder!))
+        .order("asc")
+        .first();
+
+      if (nextBlock) {
+        // Insert between afterOrder and nextBlock.order using fractional indexing
+        newOrder = calculateOrder(args.afterOrder, nextBlock.order);
+      } else {
+        // No next block, just add 1 to the afterOrder
+        newOrder = args.afterOrder + 1;
+      }
+    }
+
     const streamId = crypto.randomUUID();
 
     const blockId = await ctx.db.insert("blocks", {

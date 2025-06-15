@@ -38,16 +38,11 @@ export function BlockList({ conversationId }: { conversationId: string }) {
   }, []);
 
   const handleInsertBlock = useCallback(
-    async (
-      prevOrder?: number,
-      nextOrder?: number,
-      shouldFocus: boolean = true
-    ) => {
+    async (afterOrder?: number, shouldFocus: boolean = true) => {
       const newBlockId = await createBlock({
         conversationId: conversationId as Id<"conversations">,
         author: "user",
-        prevOrder,
-        nextOrder,
+        afterOrder,
       });
 
       if (shouldFocus && newBlockId) {
@@ -235,7 +230,7 @@ export function BlockList({ conversationId }: { conversationId: string }) {
                   Create your first block to begin building your living document
                 </p>
                 <Button
-                  onClick={() => handleInsertBlock(undefined, undefined)}
+                  onClick={() => handleInsertBlock(undefined)}
                   className="mt-4"
                 >
                   Add First Block
@@ -250,10 +245,7 @@ export function BlockList({ conversationId }: { conversationId: string }) {
                   block={block}
                   isSelected={selectedBlockIds.has(block._id)}
                   onSelect={handleSelectBlock}
-                  onInsertBefore={(order) =>
-                    handleInsertBlock(undefined, order)
-                  }
-                  onInsertAfter={(order) => handleInsertBlock(order, undefined)}
+                  onInsertAfter={(order) => handleInsertBlock(order)}
                   onDeleteBlock={handleDeleteBlock}
                   onArrowNavigation={handleArrowNavigation}
                   registerRef={registerBlockRef}

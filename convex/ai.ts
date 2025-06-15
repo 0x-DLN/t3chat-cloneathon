@@ -19,20 +19,12 @@ export const generateBlocks = mutation({
     apiKey: v.string(),
     userId: v.string(),
     secret: v.string(),
-    prevOrder: v.optional(v.number()),
-    nextOrder: v.optional(v.number()),
+    afterOrder: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     checkSecret(args.secret);
-    const {
-      model,
-      userId,
-      provider,
-      apiKey,
-      conversationId,
-      prevOrder,
-      nextOrder,
-    } = args;
+    const { model, userId, provider, apiKey, conversationId, afterOrder } =
+      args;
 
     const conversation = await ctx.db.get(conversationId);
     if (!conversation || conversation.userId !== userId) {
@@ -51,8 +43,7 @@ export const generateBlocks = mutation({
       {
         conversationId,
         model,
-        prevOrder,
-        nextOrder,
+        afterOrder,
       }
     );
 
