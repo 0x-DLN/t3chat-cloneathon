@@ -14,7 +14,7 @@ import {
 } from "react";
 import { cn } from "~/lib/utils";
 import { Button } from "./ui/button";
-import { Eye, EyeOff, Plus, Trash, MoreHorizontal } from "lucide-react";
+import { Eye, EyeOff, Plus } from "lucide-react";
 import { Checkbox } from "./ui/checkbox";
 
 type EditableBlockProps = {
@@ -297,16 +297,39 @@ export const EditableBlock = forwardRef<
 
     if (block.isStreaming && block.streamingContent) {
       return (
-        <div className="group relative px-6 py-3">
-          <div className="flex items-start gap-3">
-            <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center mt-1 shrink-0">
-              <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="prose prose-sm max-w-none text-foreground">
+        <div className="group relative transition-all duration-200 rounded-md">
+          <div className="absolute size-full border-2 border-blue-500 animate-pulse rounded-md"></div>
+          {/* Main content area */}
+          <div className="flex items-start gap-3 px-6">
+            {/* Insert button (left side) - hidden during streaming */}
+            <div className="w-6 h-6 flex items-center justify-center mt-1 shrink-0" />
+
+            {/* Content */}
+            <div className="flex-1 flex items-center p-1">
+              <div className="prose prose-sm max-w-none focus:outline-none text-foreground prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-code:text-foreground prose-pre:bg-muted prose-pre:text-foreground flex-1 flex-items-center w-full">
                 {block.streamingContent}
-                <span className="inline-block w-2 h-4 bg-blue-500 animate-pulse ml-1" />
               </div>
+            </div>
+
+            {/* Controls - hidden during streaming but maintain width */}
+            <div className="flex items-center gap-1 transition-opacity duration-200 ml-2">
+              {/* Invisible placeholder for checkbox */}
+              <div className="h-7 w-7 p-0 invisible">
+                <Checkbox
+                  checked={false}
+                  onChange={() => {}}
+                  className="pointer-events-none"
+                />
+              </div>
+
+              {/* Invisible placeholder for eye button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0 invisible pointer-events-none"
+              >
+                <Eye className="w-3.5 h-3.5" />
+              </Button>
             </div>
           </div>
         </div>
@@ -370,28 +393,6 @@ export const EditableBlock = forwardRef<
               ) : (
                 <Eye className="w-3.5 h-3.5" />
               )}
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                onDeleteBlock(block._id, "Delete");
-                deleteBlock({ blockId: block._id });
-              }}
-              className="h-7 w-7 p-0 hover:bg-destructive hover:text-destructive-foreground"
-              title="Delete block"
-            >
-              <Trash className="w-3.5 h-3.5" />
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 w-7 p-0 hover:bg-accent opacity-60"
-              title="More options"
-            >
-              <MoreHorizontal className="w-3.5 h-3.5" />
             </Button>
           </div>
         </div>
