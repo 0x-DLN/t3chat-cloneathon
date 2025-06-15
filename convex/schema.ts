@@ -56,8 +56,8 @@ export default defineSchema({
     conversationId: v.id("conversations"),
     author: v.union(v.literal("user"), v.literal("assistant")),
 
-    // Rich text content (Tiptap JSON format)
-    content: v.optional(v.any()),
+    // Rich text content (Tiptap JSON format stored as stringified JSON)
+    content: v.optional(v.string()),
 
     // For streaming (temporary Markdown content)
     streamingContent: v.optional(v.string()),

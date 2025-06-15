@@ -18,26 +18,38 @@ export const getBlocksUser = query({
       throw new Error("Unauthorized");
     }
 
-    return await ctx.db
+    const blocks = await ctx.db
       .query("blocks")
       .withIndex("by_conversation_and_order", (q) =>
         q.eq("conversationId", args.conversationId)
       )
       .order("asc")
       .collect();
+
+    // Parse stringified JSON content back to objects for frontend
+    return blocks.map((block) => ({
+      ...block,
+      content: block.content ? JSON.parse(block.content) : undefined,
+    }));
   },
 });
 
 export const getBlocksAssistant = internalQuery({
   args: { conversationId: v.id("conversations") },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const blocks = await ctx.db
       .query("blocks")
       .withIndex("by_conversation_and_inclusion", (q) =>
         q.eq("conversationId", args.conversationId).eq("isExcluded", false)
       )
       .order("asc")
       .collect();
+
+    // Parse stringified JSON content back to objects for internal use
+    return blocks.map((block) => ({
+      ...block,
+      content: block.content ? JSON.parse(block.content) : undefined,
+    }));
   },
 });
 
@@ -89,13 +101,20 @@ export const createUserBlock = mutation({
       }
     }
 
+    const defaultContent = {
+      type: "doc",
+      content: [{ type: "paragraph" }],
+    };
+
+    // Stringify content before storing
+    const contentToStore = args.content
+      ? JSON.stringify(args.content)
+      : JSON.stringify(defaultContent);
+
     return await ctx.db.insert("blocks", {
       conversationId: args.conversationId,
       author: args.author,
-      content: args.content || {
-        type: "doc",
-        content: [{ type: "paragraph" }],
-      },
+      content: contentToStore,
       order: newOrder,
       isExcluded: false,
       isStreaming: false,
@@ -220,8 +239,11 @@ export const updateBlockUser = mutation({
       throw new Error("Unauthorized");
     }
 
+    // Stringify content before storing
+    const contentToStore = JSON.stringify(args.content);
+
     await ctx.db.patch(args.blockId, {
-      content: args.content,
+      content: contentToStore,
       updatedAt: Date.now(),
     });
   },
@@ -266,8 +288,11 @@ export const completeBlockAssistant = internalMutation({
     ),
   },
   handler: async (ctx, args) => {
+    // Stringify content before storing
+    const contentToStore = JSON.stringify(args.content);
+
     await ctx.db.patch(args.blockId, {
-      content: args.content,
+      content: contentToStore,
       isStreaming: false,
       streamId: undefined,
       streamingContent: undefined,

@@ -195,9 +195,10 @@ export const streamBlockResponse = internalAction({
             break;
           }
           case "finish": {
+            const tiptapJson = await markdownToTiptapJson(accumulatedContent);
             await ctx.runMutation(internal.blocks.completeBlockAssistant, {
               blockId,
-              content: await markdownToTiptapJson(accumulatedContent),
+              content: tiptapJson,
               streamId,
               metadata: {
                 model: aiModel.modelId,
