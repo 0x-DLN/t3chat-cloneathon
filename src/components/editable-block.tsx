@@ -115,7 +115,7 @@ export const EditableBlock = forwardRef<
         editorProps: {
           attributes: {
             class:
-              "prose prose-sm max-w-none focus:outline-none text-foreground prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-code:text-foreground prose-pre:bg-muted prose-pre:text-foreground flex-1 flex-items-center w-full",
+              "prose prose-sm max-w-none focus:outline-none prose-headings:text-foreground prose-strong:font-semibold prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:text-foreground prose-ul:list-disc prose-ol:list-decimal prose-li:marker:text-muted-foreground flex-1 w-full",
           },
           handleKeyDown: (view, event) => {
             const { state } = view;
@@ -313,13 +313,13 @@ export const EditableBlock = forwardRef<
         <div className="group relative transition-all duration-200 rounded-md">
           <div className="absolute size-full border-2 border-blue-500 animate-pulse rounded-md"></div>
           {/* Main content area */}
-          <div className="flex items-start gap-3 px-6">
+          <div className="flex items-start gap-3 pl-6">
             {/* Insert button (left side) - hidden during streaming */}
             <div className="w-6 h-6 flex items-center justify-center mt-1 shrink-0" />
 
             {/* Content */}
             <div className="flex-1 flex items-center p-1">
-              <div className="prose prose-sm max-w-none focus:outline-none text-foreground prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-code:text-foreground prose-pre:bg-muted prose-pre:text-foreground flex-1 flex-items-center w-full">
+              <div className="prose prose-sm max-w-none focus:outline-none prose-headings:text-foreground prose-strong:font-semibold prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:text-foreground prose-ul:list-disc prose-ol:list-decimal prose-li:marker:text-muted-foreground flex-1 w-full">
                 {block.streamingContent}
               </div>
             </div>
@@ -358,7 +358,7 @@ export const EditableBlock = forwardRef<
         )}
       >
         {/* Main content area */}
-        <div className="flex items-start gap-3 px-6">
+        <div className="flex items-start gap-3 pl-6">
           {/* Insert button (left side) */}
           <div className="w-6 h-6 flex items-center justify-center mt-1 shrink-0">
             <Button
