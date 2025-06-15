@@ -4,6 +4,7 @@ import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
 import { EditableBlock } from "./editable-block";
 import { Button } from "./ui/button";
+import { ScrollArea } from "./ui/scroll-area";
 
 export function BlockList({ conversationId }: { conversationId: string }) {
   const [selectedBlockIds, setSelectedBlockIds] = useState<Set<Id<"blocks">>>(
@@ -15,6 +16,7 @@ export function BlockList({ conversationId }: { conversationId: string }) {
       {
         focus: (position?: "start" | "end") => void;
         focusAtVisualOffset: (offset: number) => void;
+        isEditorEmpty?: () => boolean;
       }
     >
   >(new Map());
@@ -145,6 +147,7 @@ export function BlockList({ conversationId }: { conversationId: string }) {
       ref: {
         focus: (position?: "start" | "end") => void;
         focusAtVisualOffset: (offset: number) => void;
+        isEditorEmpty?: () => boolean;
       } | null
     ) => {
       if (ref) {
@@ -155,6 +158,32 @@ export function BlockList({ conversationId }: { conversationId: string }) {
     },
     []
   );
+
+  const handleClickBelowBlocks = useCallback(() => {
+    if (!blocks || blocks.length === 0) {
+      // No blocks, create the first one
+      handleInsertBlock(undefined);
+      return;
+    }
+
+    const lastBlock = blocks[blocks.length - 1];
+    const lastBlockRef = blockRefs.current.get(lastBlock._id);
+
+    if (!lastBlockRef) {
+      // Can't find ref, create a new block as fallback
+      handleInsertBlock(lastBlock.order);
+      return;
+    }
+
+    // Check if the last block is empty using the editor's isEmpty property
+    if (lastBlockRef.isEditorEmpty && lastBlockRef.isEditorEmpty()) {
+      // Last block is empty, focus it
+      lastBlockRef.focus("start");
+    } else {
+      // Last block has content, create a new block
+      handleInsertBlock(lastBlock.order);
+    }
+  }, [blocks, handleInsertBlock]);
 
   if (!blocks) {
     return (
@@ -183,8 +212,8 @@ export function BlockList({ conversationId }: { conversationId: string }) {
       </div>
 
       {/* Document content */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-4xl mx-auto">
+      <ScrollArea className="flex-1">
+        <div className="max-w-4xl mx-auto h-screen">
           {blocks.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 px-6">
               <div className="text-center space-y-4">
@@ -220,23 +249,31 @@ export function BlockList({ conversationId }: { conversationId: string }) {
               </div>
             </div>
           ) : (
-            <div className="py-6">
-              {blocks.map((block) => (
-                <EditableBlock
-                  key={block._id}
-                  block={block}
-                  isSelected={selectedBlockIds.has(block._id)}
-                  onSelect={handleSelectBlock}
-                  onInsertAfter={(order) => handleInsertBlock(order)}
-                  onDeleteBlock={handleDeleteBlock}
-                  onNavigateBlock={handleNavigateBlock}
-                  registerRef={registerBlockRef}
-                />
-              ))}
+            <div className="py-6 flex flex-col min-h-full">
+              <div>
+                {blocks.map((block) => (
+                  <EditableBlock
+                    key={block._id}
+                    block={block}
+                    isSelected={selectedBlockIds.has(block._id)}
+                    onSelect={handleSelectBlock}
+                    onInsertAfter={(order) => handleInsertBlock(order)}
+                    onDeleteBlock={handleDeleteBlock}
+                    onNavigateBlock={handleNavigateBlock}
+                    registerRef={registerBlockRef}
+                  />
+                ))}
+              </div>
+
+              {/* Clickable area below blocks - spans remaining height */}
+              <div
+                className="flex-1 w-full px-6 min-h-32"
+                onClick={handleClickBelowBlocks}
+              />
             </div>
           )}
         </div>
-      </div>
+      </ScrollArea>
     </div>
   );
 }

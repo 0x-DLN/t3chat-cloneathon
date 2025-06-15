@@ -33,6 +33,7 @@ type EditableBlockProps = {
     ref: {
       focus: (position?: "start" | "end") => void;
       focusAtVisualOffset: (offset: number) => void;
+      isEditorEmpty?: () => boolean;
     } | null
   ) => void;
 };
@@ -41,6 +42,7 @@ export const EditableBlock = forwardRef<
   {
     focus: (position?: "start" | "end") => void;
     focusAtVisualOffset: (offset: number) => void;
+    isEditorEmpty?: () => boolean;
   },
   EditableBlockProps
 >(
@@ -259,6 +261,12 @@ export const EditableBlock = forwardRef<
             editor.commands.focus(targetPos);
           }
         },
+        isEditorEmpty: () => {
+          if (editor) {
+            return editor.isEmpty;
+          }
+          return true;
+        },
       }),
       [editor, getPositionFromVisualOffset]
     );
@@ -280,6 +288,12 @@ export const EditableBlock = forwardRef<
             const targetPos = getPositionFromVisualOffset(editor, targetOffset);
             editor.commands.focus(targetPos);
           }
+        },
+        isEditorEmpty: () => {
+          if (editor) {
+            return editor.isEmpty;
+          }
+          return true;
         },
       };
 
