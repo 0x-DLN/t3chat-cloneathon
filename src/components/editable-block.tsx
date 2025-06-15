@@ -120,123 +120,126 @@ export const EditableBlock = forwardRef<
       []
     );
 
-    const editor = useEditor({
-      extensions: [
-        StarterKit,
-        Placeholder.configure({
-          placeholder:
-            block.author === "user" ? "Type something..." : "AI thinking...",
-        }),
-      ],
-      content: block.content,
-      injectCSS: false,
-      editorProps: {
-        attributes: {
-          class:
-            "prose prose-sm max-w-none focus:outline-none text-foreground prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-code:text-foreground prose-pre:bg-muted prose-pre:text-foreground flex-1 flex-items-center w-full",
-        },
-        handleKeyDown: (view, event) => {
-          const { state } = view;
-          const { selection } = state;
-          const { $from } = selection;
+    const editor = useEditor(
+      {
+        extensions: [
+          StarterKit,
+          Placeholder.configure({
+            placeholder:
+              block.author === "user" ? "Type something..." : "AI thinking...",
+          }),
+        ],
+        content: block.content,
+        injectCSS: false,
+        editorProps: {
+          attributes: {
+            class:
+              "prose prose-sm max-w-none focus:outline-none text-foreground prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-code:text-foreground prose-pre:bg-muted prose-pre:text-foreground flex-1 flex-items-center w-full",
+          },
+          handleKeyDown: (view, event) => {
+            const { state } = view;
+            const { selection } = state;
+            const { $from } = selection;
 
-          // Handle Enter key - create new block
-          if (event.key === "Enter" && !event.shiftKey) {
-            // Check if we're at the end of the block
-            if ($from.pos === state.doc.content.size - 1) {
-              event.preventDefault();
-              onInsertAfter(block.order);
-              return true;
-            }
-          }
-
-          // Handle Backspace and Delete on empty blocks
-          if (event.key === "Backspace" || event.key === "Delete") {
-            const isEmpty = state.doc.textContent.trim() === "";
-
-            if (isEmpty) {
-              event.preventDefault();
-              onDeleteBlock(block._id, event.key);
-              deleteBlock({ blockId: block._id });
-              return true;
-            }
-          }
-
-          // Handle Arrow key navigation between blocks
-          if (
-            onArrowNavigation &&
-            editor &&
-            ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(
-              event.key
-            )
-          ) {
-            const currentPos = $from.pos;
-            const docStart = 1;
-            const docEnd = state.doc.content.size - 1;
-
-            switch (event.key) {
-              case "ArrowUp":
-                // Always navigate to previous block
+            // Handle Enter key - create new block
+            if (event.key === "Enter" && !event.shiftKey) {
+              // Check if we're at the end of the block
+              if ($from.pos === state.doc.content.size - 1) {
                 event.preventDefault();
-                const visualOffsetUp = getVisualOffset(editor, currentPos);
-                return onArrowNavigation(
-                  block._id,
-                  "up",
-                  currentPos,
-                  visualOffsetUp
-                );
-
-              case "ArrowDown":
-                // Always navigate to next block
-                event.preventDefault();
-                const visualOffsetDown = getVisualOffset(editor, currentPos);
-                return onArrowNavigation(
-                  block._id,
-                  "down",
-                  currentPos,
-                  visualOffsetDown
-                );
-
-              case "ArrowLeft":
-                // If we're at the very beginning, navigate to previous block
-                if (currentPos <= docStart) {
-                  event.preventDefault();
-                  return onArrowNavigation(block._id, "left", currentPos);
-                }
-                break;
-
-              case "ArrowRight":
-                // If we're at the very end, navigate to next block
-                if (currentPos >= docEnd) {
-                  event.preventDefault();
-                  return onArrowNavigation(block._id, "right", currentPos);
-                }
-                break;
+                onInsertAfter(block.order);
+                return true;
+              }
             }
-          }
 
-          return false;
+            // Handle Backspace and Delete on empty blocks
+            if (event.key === "Backspace" || event.key === "Delete") {
+              const isEmpty = state.doc.textContent.trim() === "";
+
+              if (isEmpty) {
+                event.preventDefault();
+                onDeleteBlock(block._id, event.key);
+                deleteBlock({ blockId: block._id });
+                return true;
+              }
+            }
+
+            // Handle Arrow key navigation between blocks
+            if (
+              onArrowNavigation &&
+              editor &&
+              ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(
+                event.key
+              )
+            ) {
+              const currentPos = $from.pos;
+              const docStart = 1;
+              const docEnd = state.doc.content.size - 1;
+
+              switch (event.key) {
+                case "ArrowUp":
+                  // Always navigate to previous block
+                  event.preventDefault();
+                  const visualOffsetUp = getVisualOffset(editor, currentPos);
+                  return onArrowNavigation(
+                    block._id,
+                    "up",
+                    currentPos,
+                    visualOffsetUp
+                  );
+
+                case "ArrowDown":
+                  // Always navigate to next block
+                  event.preventDefault();
+                  const visualOffsetDown = getVisualOffset(editor, currentPos);
+                  return onArrowNavigation(
+                    block._id,
+                    "down",
+                    currentPos,
+                    visualOffsetDown
+                  );
+
+                case "ArrowLeft":
+                  // If we're at the very beginning, navigate to previous block
+                  if (currentPos <= docStart) {
+                    event.preventDefault();
+                    return onArrowNavigation(block._id, "left", currentPos);
+                  }
+                  break;
+
+                case "ArrowRight":
+                  // If we're at the very end, navigate to next block
+                  if (currentPos >= docEnd) {
+                    event.preventDefault();
+                    return onArrowNavigation(block._id, "right", currentPos);
+                  }
+                  break;
+              }
+            }
+
+            return false;
+          },
         },
+        onUpdate: () => {
+          if (isEditing) {
+            setHasUnsavedChanges(true);
+          }
+        },
+        onFocus: () => setIsEditing(true),
+        onBlur: ({ editor }: { editor: Editor }) => {
+          setIsEditing(false);
+          if (hasUnsavedChanges) {
+            updateBlock({
+              blockId: block._id,
+              content: editor.getJSON(),
+            });
+            setHasUnsavedChanges(false);
+          }
+        },
+        immediatelyRender: false,
+        shouldRerenderOnTransaction: false,
       },
-      onUpdate: () => {
-        if (isEditing) {
-          setHasUnsavedChanges(true);
-        }
-      },
-      onFocus: () => setIsEditing(true),
-      onBlur: ({ editor }: { editor: Editor }) => {
-        setIsEditing(false);
-        if (hasUnsavedChanges) {
-          updateBlock({
-            blockId: block._id,
-            content: editor.getJSON(),
-          });
-          setHasUnsavedChanges(false);
-        }
-      },
-      immediatelyRender: false,
-      shouldRerenderOnTransaction: false,
-    });
+      [block.isStreaming]
+    );
 
     // Expose focus methods to parent
     useImperativeHandle(

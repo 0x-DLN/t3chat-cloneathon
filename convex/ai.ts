@@ -66,6 +66,14 @@ export const generateBlocks = mutation({
         .filter((block) => block.content.length),
     ];
 
+    // If the last message is from the assistant, we need to add a user block to tell it to continue.
+    if (blocksToUse[blocksToUse.length - 1].role === "assistant") {
+      blocksToUse.push({
+        role: "user",
+        content: "Continue",
+      });
+    }
+
     await ctx.scheduler.runAfter(0, internal.ai.streamBlockResponse, {
       messages: blocksToUse,
       model,

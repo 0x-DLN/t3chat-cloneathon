@@ -82,5 +82,6 @@ export default defineSchema({
     ),
   })
     .index("by_conversation", ["conversationId"])
-    .index("by_conversation_and_order", ["conversationId", "order"]),
+    .index("by_conversation_and_order", ["conversationId", "order"])
+    .index("by_conversation_and_inclusion", ["conversationId", "isExcluded"]),
 });

@@ -33,9 +33,10 @@ export const getBlocksAssistant = internalQuery({
   handler: async (ctx, args) => {
     return await ctx.db
       .query("blocks")
-      .withIndex("by_conversation", (q) =>
-        q.eq("conversationId", args.conversationId)
+      .withIndex("by_conversation_and_inclusion", (q) =>
+        q.eq("conversationId", args.conversationId).eq("isExcluded", false)
       )
+      .order("asc")
       .collect();
   },
 });
