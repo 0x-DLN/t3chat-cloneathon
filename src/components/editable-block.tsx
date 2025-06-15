@@ -14,8 +14,9 @@ import {
 } from "react";
 import { cn } from "~/lib/utils";
 import { Button } from "./ui/button";
-import { Eye, EyeOff, Plus } from "lucide-react";
+import { Eye, EyeOff, Plus, Copy, Trash2 } from "lucide-react";
 import { Checkbox } from "./ui/checkbox";
+import { convertTiptapJsonToMarkdown } from "~/lib/markdown/parser";
 
 type EditableBlockProps = {
   block: Doc<"blocks">;
@@ -308,6 +309,24 @@ export const EditableBlock = forwardRef<
       toggleExclude({ blockId: block._id, isExcluded: !block.isExcluded });
     }, [block.isExcluded, block._id, toggleExclude]);
 
+    const handleCopyContent = useCallback(async () => {
+      if (editor) {
+        try {
+          // Get the JSON content from the editor and convert to markdown
+          const json = editor.getJSON();
+          const markdown = convertTiptapJsonToMarkdown(json);
+          await navigator.clipboard.writeText(markdown);
+        } catch (error) {
+          console.error("Failed to copy content:", error);
+        }
+      }
+    }, [editor]);
+
+    const handleDeleteBlock = useCallback(() => {
+      onDeleteBlock(block._id, "Delete");
+      deleteBlock({ blockId: block._id });
+    }, [block._id, onDeleteBlock, deleteBlock]);
+
     if (block.isStreaming && block.streamingContent) {
       return (
         <div className="group relative transition-all duration-200 rounded-md">
@@ -326,7 +345,7 @@ export const EditableBlock = forwardRef<
 
             {/* Controls - hidden during streaming but maintain width */}
             <div className="flex items-center gap-1 transition-opacity duration-200 ml-2">
-              {/* Invisible placeholder for checkbox */}
+              {/* Invisible placeholder for selection checkbox */}
               <div className="h-7 w-7 p-0 invisible">
                 <Checkbox
                   checked={false}
@@ -335,6 +354,15 @@ export const EditableBlock = forwardRef<
                 />
               </div>
 
+              {/* Invisible placeholder for copy button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0 invisible pointer-events-none"
+              >
+                <Copy className="w-3.5 h-3.5" />
+              </Button>
+
               {/* Invisible placeholder for eye button */}
               <Button
                 variant="ghost"
@@ -342,6 +370,15 @@ export const EditableBlock = forwardRef<
                 className="h-7 w-7 p-0 invisible pointer-events-none"
               >
                 <Eye className="w-3.5 h-3.5" />
+              </Button>
+
+              {/* Invisible placeholder for delete button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0 invisible pointer-events-none"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
               </Button>
             </div>
           </div>
@@ -380,6 +417,7 @@ export const EditableBlock = forwardRef<
 
           {/* Controls */}
           <div className="flex items-center gap-1 transition-opacity duration-200 ml-2 opacity-0 group-hover:opacity-100">
+            {/* 1. Selection checkbox */}
             <div
               className="h-7 w-7 p-0 hover:bg-accent flex items-center justify-center rounded-md"
               title="Select block"
@@ -392,6 +430,18 @@ export const EditableBlock = forwardRef<
               />
             </div>
 
+            {/* 2. Copy button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleCopyContent}
+              className="h-7 w-7 p-0 hover:bg-accent"
+              title="Copy content"
+            >
+              <Copy className="w-3.5 h-3.5" />
+            </Button>
+
+            {/* 3. Toggle exclusion button */}
             <Button
               variant="ghost"
               size="sm"
@@ -406,6 +456,17 @@ export const EditableBlock = forwardRef<
               ) : (
                 <Eye className="w-3.5 h-3.5" />
               )}
+            </Button>
+
+            {/* 4. Delete button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDeleteBlock}
+              className="h-7 w-7 p-0 hover:text-destructive"
+              title="Delete block"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
             </Button>
           </div>
         </div>
