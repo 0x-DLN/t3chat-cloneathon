@@ -39,6 +39,13 @@ export const generateBlocks = mutation({
       throw new Error("Unauthorized");
     }
 
+    const conversationBlocks = await ctx.runQuery(
+      internal.blocks.getBlocksAssistant,
+      {
+        conversationId,
+      }
+    );
+
     const aiBlock = await ctx.runMutation(
       internal.blocks.createAssistantBlock,
       {
@@ -48,19 +55,15 @@ export const generateBlocks = mutation({
         nextOrder,
       }
     );
-    const conversationBlocks = await ctx.runQuery(
-      internal.blocks.getBlocksAssistant,
-      {
-        conversationId,
-      }
-    );
 
     const blocksToUse: CoreMessage[] = [
       { role: "system", content: "You are a helpful assistant." },
-      ...conversationBlocks.map((block) => ({
-        role: block.author,
-        content: convertTiptapJsonToMarkdown(block.content),
-      })),
+      ...conversationBlocks
+        .map((block) => ({
+          role: block.author,
+          content: convertTiptapJsonToMarkdown(block.content),
+        }))
+        .filter((block) => block.content.length),
     ];
 
     await ctx.scheduler.runAfter(0, internal.ai.streamBlockResponse, {

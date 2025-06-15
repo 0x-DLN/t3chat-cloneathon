@@ -35,4 +35,31 @@ export const chatRouter = createTRPCRouter({
 
       return result;
     }),
+  sendBlockMessage: protectedProcedure
+    .input(
+      z.object({
+        conversationId: z.string().optional(),
+        model: z.string(),
+        provider: z.enum(["openai", "google"]),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const apiKey = await ctx.db.apiKey.findFirstOrThrow({
+        where: {
+          userId: ctx.session.user.id,
+          provider: input.provider,
+        },
+      });
+
+      const { model, provider, conversationId } = input;
+
+      await ctx.convex.mutation(api.ai.generateBlocks, {
+        model,
+        provider,
+        apiKey: decrypt(apiKey.key),
+        conversationId: conversationId as Id<"conversations">,
+        userId: ctx.session.user.id,
+        secret: env.CONVEX_SECRET,
+      });
+    }),
 });
