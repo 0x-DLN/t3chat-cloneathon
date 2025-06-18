@@ -9,9 +9,6 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -20,22 +17,8 @@ import {
 import type { auth } from "~/lib/auth/server";
 import { Badge } from "./ui/badge";
 import { useEffect, useRef } from "react";
-
-// Dummy thread data - will be replaced with API calls later
-const dummyThreads = [
-  {
-    id: "1",
-    title: "Help with React hooks",
-  },
-  {
-    id: "2",
-    title: "Next.js routing question",
-  },
-  {
-    id: "3",
-    title: "TypeScript type errors",
-  },
-];
+import { Authenticated } from "convex/react";
+import ConversationsSidebar from "./conversations-sidebar";
 
 type User = NonNullable<
   Awaited<ReturnType<typeof auth.api.getSession>>
@@ -80,22 +63,9 @@ export function AppSidebar({ user }: { user: User }) {
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Conversations</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {dummyThreads.map((thread) => (
-                <SidebarMenuItem key={thread.id}>
-                  <SidebarMenuButton asChild className="py-2">
-                    <Link href={`/chat/${thread.id}`}>
-                      <span className="truncate">{thread.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <Authenticated>
+          <ConversationsSidebar />
+        </Authenticated>
       </SidebarContent>
 
       <SidebarFooter>
