@@ -34,6 +34,8 @@ export default function ApiKeyCard() {
         <ApiKeyForm provider="openai" />
         <Separator className="my-6" />
         <ApiKeyForm provider="google" />
+        <Separator className="my-6" />
+        <ApiKeyForm provider="openrouter" />
       </CardContent>
     </Card>
   );
@@ -151,14 +153,16 @@ function ApiKeyForm({ provider }: { provider: ApiProviderId }) {
               className="text-base font-medium flex justify-between"
             >
               {API_PROVIDERS[provider].name}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="hover:text-destructive"
-                onClick={() => deleteApiKeyMutation.mutate({ provider })}
-              >
-                <Trash className="h-6 w-6" />
-              </Button>
+              {existingKeys?.[provider] && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="hover:text-destructive"
+                  onClick={() => deleteApiKeyMutation.mutate({ provider })}
+                >
+                  <Trash className="h-6 w-6" />
+                </Button>
+              )}
             </Label>
             <p className="text-sm text-muted-foreground mt-1">
               {API_PROVIDERS[provider].description}

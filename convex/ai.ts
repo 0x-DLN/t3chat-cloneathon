@@ -15,7 +15,11 @@ export const generateBlocks = mutation({
   args: {
     conversationId: v.id("conversations"),
     model: v.string(),
-    provider: v.union(v.literal("openai"), v.literal("google")),
+    provider: v.union(
+      v.literal("openai"),
+      v.literal("google"),
+      v.literal("openrouter")
+    ),
     apiKey: v.string(),
     userId: v.string(),
     secret: v.string(),
@@ -82,7 +86,11 @@ export const sendMessage = mutation({
     conversationId: v.optional(v.id("conversations")),
     message: v.string(),
     model: v.string(),
-    provider: v.union(v.literal("openai"), v.literal("google")),
+    provider: v.union(
+      v.literal("openai"),
+      v.literal("google"),
+      v.literal("openrouter")
+    ),
     apiKey: v.string(),
     userId: v.string(),
     secret: v.string(),

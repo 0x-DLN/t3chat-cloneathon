@@ -36,6 +36,44 @@ export const API_PROVIDERS = {
     ],
     keyPlaceholder: "AIza...",
   },
+  openrouter: {
+    id: "openrouter",
+    name: "OpenRouter",
+    description: "Access to OpenRouter models and services",
+    models: [
+      {
+        label: "Gemini 2.0 Flash",
+        id: "google/gemini-2.0-flash-001",
+        contextLength: 1048576,
+      },
+      {
+        label: "Gemini 2.5 Flash",
+        id: "google/gemini-2.5-flash",
+        contextLength: 1048576,
+      },
+      {
+        label: "Gemini 2.5 Pro",
+        id: "google/gemini-2.5-pro",
+        contextLength: 1048576,
+      },
+      {
+        label: "OpenAI: GPT-4.1",
+        id: "openai/gpt-4.1",
+        contextLength: 1047576,
+      },
+      {
+        label: "OpenAI: GPT-4.1 Mini",
+        id: "openai/gpt-4.1-mini",
+        contextLength: 1047576,
+      },
+      {
+        label: "OpenAI: GPT-4.1 Nano",
+        id: "openai/gpt-4.1-nano",
+        contextLength: 1047576,
+      },
+    ],
+    keyPlaceholder: "sk-...",
+  },
 } as const;
 
 export const providers = Object.keys(API_PROVIDERS) as ApiProviderId[];

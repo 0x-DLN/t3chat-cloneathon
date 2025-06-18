@@ -13,10 +13,12 @@ export const apiKeyRouter = createTRPCRouter({
 
     const openaiKey = apiKeys.find((key) => key.provider === "openai");
     const googleKey = apiKeys.find((key) => key.provider === "google");
+    const openrouterKey = apiKeys.find((key) => key.provider === "openrouter");
 
     return {
       openai: openaiKey ? decrypt(openaiKey.key) : "",
       google: googleKey ? decrypt(googleKey.key) : "",
+      openrouter: openrouterKey ? decrypt(openrouterKey.key) : "",
     };
   }),
   upsertApiKey: protectedProcedure

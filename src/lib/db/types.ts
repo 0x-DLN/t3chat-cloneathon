@@ -5,6 +5,11 @@
 
 import type { ColumnType } from "kysely";
 
+export enum Apiprovider {
+  GOOGLE = "google",
+  OPENAI = "openai",
+}
+
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export interface Account {
@@ -21,6 +26,20 @@ export interface Account {
   scope: string | null;
   updatedAt: Timestamp;
   userId: string;
+}
+
+export interface ApiKey {
+  id: string;
+  key: string;
+  provider: Apiprovider;
+  userId: string;
+}
+
+export interface Jwks {
+  createdAt: Timestamp;
+  id: string;
+  privateKey: string;
+  publicKey: string;
 }
 
 export interface Session {
@@ -55,6 +74,8 @@ export interface Verification {
 
 export interface DB {
   account: Account;
+  apiKey: ApiKey;
+  jwks: Jwks;
   session: Session;
   user: User;
   verification: Verification;
