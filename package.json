@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
-    "vercel-build": "prisma generate && prisma migrate deploy && convex codegen && pnpm build",
+    "vercel-build": "prisma generate && prisma migrate deploy && pnpm build",
     "start": "next start",
     "preview": "next build && next start",
     "typecheck": "tsc --noEmit",
