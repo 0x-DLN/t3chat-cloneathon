@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Command, Search } from "lucide-react";
+import { Command, Github, Search } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -69,6 +69,18 @@ export function AppSidebar({ user }: { user: User }) {
       </SidebarContent>
 
       <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild className="py-6">
+              <Button size="icon" variant="ghost" asChild>
+                <Link href="https://github.com/0x-DLN/t3chat-cloneathon">
+                  <Github className="w-4 h-4" />
+                  <span>View on GitHub</span>
+                </Link>
+              </Button>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="py-6">
