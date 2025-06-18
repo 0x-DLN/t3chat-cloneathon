@@ -270,12 +270,10 @@ export function BlockList({ conversationId }: { conversationId: string }) {
           >
             {conversation?.title || "Loading..."}
           </h1>
-          <div className="flex items-center gap-2 mt-1">
+          <div className="flex items-center mt-1">
             <span className="text-sm text-muted-foreground">
               {blocks.length} blocks
             </span>
-            <span className="text-xs text-muted-foreground/60">•</span>
-            <span className="text-sm text-muted-foreground">~100 tokens</span>
           </div>
         </div>
       </div>
@@ -286,23 +284,6 @@ export function BlockList({ conversationId }: { conversationId: string }) {
           {blocks.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 px-6">
               <div className="text-center space-y-4">
-                <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    className="text-muted-foreground"
-                  >
-                    <path
-                      d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
                 <h3 className="text-lg font-medium text-foreground">
                   Start your document
                 </h3>

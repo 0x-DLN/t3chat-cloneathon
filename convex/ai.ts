@@ -10,12 +10,17 @@ import {
   convertTiptapJsonToMarkdown,
   markdownToTiptapJson,
 } from "~/lib/markdown/parser";
+import { SYSTEM_PROMPT } from "~/shared/api-providers";
 
 export const generateBlocks = mutation({
   args: {
     conversationId: v.id("conversations"),
     model: v.string(),
-    provider: v.union(v.literal("openai"), v.literal("google")),
+    provider: v.union(
+      v.literal("openai"),
+      v.literal("google"),
+      v.literal("openrouter")
+    ),
     apiKey: v.string(),
     userId: v.string(),
     secret: v.string(),
@@ -48,7 +53,7 @@ export const generateBlocks = mutation({
     );
 
     const blocksToUse: CoreMessage[] = [
-      { role: "system", content: "You are a helpful assistant." },
+      { role: "system", content: SYSTEM_PROMPT },
       ...conversationBlocks
         .map((block) => ({
           role: block.author,
@@ -61,7 +66,7 @@ export const generateBlocks = mutation({
     if (blocksToUse[blocksToUse.length - 1].role === "assistant") {
       blocksToUse.push({
         role: "user",
-        content: "Continue",
+        content: "<EMPTY_MESSAGE>",
       });
     }
 
@@ -82,7 +87,11 @@ export const sendMessage = mutation({
     conversationId: v.optional(v.id("conversations")),
     message: v.string(),
     model: v.string(),
-    provider: v.union(v.literal("openai"), v.literal("google")),
+    provider: v.union(
+      v.literal("openai"),
+      v.literal("google"),
+      v.literal("openrouter")
+    ),
     apiKey: v.string(),
     userId: v.string(),
     secret: v.string(),

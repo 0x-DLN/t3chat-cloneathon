@@ -4,6 +4,7 @@ import { z } from "zod/v4";
 import { env } from "~/env";
 import type { Id } from "@convex/_generated/dataModel";
 import { decrypt } from "~/lib/encryption";
+import { providers } from "~/shared/api-providers";
 
 export const chatRouter = createTRPCRouter({
   sendMessage: protectedProcedure
@@ -12,7 +13,7 @@ export const chatRouter = createTRPCRouter({
         conversationId: z.string().optional(),
         message: z.string(),
         model: z.string(),
-        provider: z.enum(["openai", "google"]),
+        provider: z.enum(providers),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -40,7 +41,7 @@ export const chatRouter = createTRPCRouter({
       z.object({
         conversationId: z.string().optional(),
         model: z.string(),
-        provider: z.enum(["openai", "google"]),
+        provider: z.enum(providers),
       })
     )
     .mutation(async ({ ctx, input }) => {

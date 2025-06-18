@@ -90,6 +90,7 @@ model ApiKey {
 enum ApiProvider {
   openai
   google
+  openrouter
 }
 
 model Jwks {

@@ -1,8 +1,10 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { ApiProviderId } from "~/shared/api-providers";
 
 export function getAiModel(
-  provider: "openai" | "google",
+  provider: ApiProviderId,
   model: string,
   apiKey: string
 ) {
@@ -18,6 +20,12 @@ export function getAiModel(
         apiKey,
       });
       return googleClient(model);
+    }
+    case "openrouter": {
+      const openrouterClient = createOpenRouter({
+        apiKey,
+      });
+      return openrouterClient(model);
     }
   }
 }
