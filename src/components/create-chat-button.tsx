@@ -2,9 +2,10 @@
 import { useMutation } from "convex/react";
 import { Button } from "./ui/button";
 import { api } from "@convex/_generated/api";
-import router from "next/router";
+import { useRouter } from "next/navigation";
 
 export default function CreateChatButton() {
+  const router = useRouter();
   const createButton = useMutation(api.conversations.createConversationUser);
 
   const handleCreateChat = async () => {
