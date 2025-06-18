@@ -4,8 +4,8 @@ export default {
     {
       type: "customJwt",
       applicationID: "convex",
-      issuer: "http://localhost:3000",
-      jwks: "http://localhost:3000/api/auth/jwks",
+      issuer: process.env.URL,
+      jwks: `${process.env.URL}/api/auth/jwks`,
       algorithm: "RS256",
     },
   ],

@@ -51,4 +51,37 @@ export default defineSchema({
   })
     .index("by_message", ["messageId"])
     .index("by_stream_and_index", ["streamId", "chunkIndex"]),
+
+  blocks: defineTable({
+    conversationId: v.id("conversations"),
+    author: v.union(v.literal("user"), v.literal("assistant")),
+
+    // Rich text content (Tiptap JSON format stored as stringified JSON)
+    content: v.optional(v.string()),
+
+    // For streaming (temporary Markdown content)
+    streamingContent: v.optional(v.string()),
+    streamId: v.optional(v.string()),
+    isStreaming: v.boolean(),
+
+    // Fractional indexing for insertion anywhere
+    order: v.number(),
+
+    // Context control
+    isExcluded: v.boolean(),
+
+    // Metadata
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    metadata: v.optional(
+      v.object({
+        tokens: v.optional(v.number()),
+        model: v.optional(v.string()),
+        finishReason: v.optional(v.string()),
+      })
+    ),
+  })
+    .index("by_conversation", ["conversationId"])
+    .index("by_conversation_and_order", ["conversationId", "order"])
+    .index("by_conversation_and_inclusion", ["conversationId", "isExcluded"]),
 });

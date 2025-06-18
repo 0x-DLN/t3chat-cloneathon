@@ -1,6 +1,6 @@
 import z from "zod/v4";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { type ApiProviderId } from "~/shared/api-providers";
+import { providers } from "~/shared/api-providers";
 import { encrypt, decrypt } from "~/lib/encryption";
 
 export const apiKeyRouter = createTRPCRouter({
@@ -11,43 +11,57 @@ export const apiKeyRouter = createTRPCRouter({
       },
     });
 
-    return apiKeys.reduce((acc, key) => {
-      acc[key.provider] = decrypt(key.key);
-      return acc;
-    }, {} as Record<ApiProviderId, string>);
+    const openaiKey = apiKeys.find((key) => key.provider === "openai");
+    const googleKey = apiKeys.find((key) => key.provider === "google");
+
+    return {
+      openai: openaiKey ? decrypt(openaiKey.key) : "",
+      google: googleKey ? decrypt(googleKey.key) : "",
+    };
   }),
-  upsertApiKeys: protectedProcedure
+  upsertApiKey: protectedProcedure
     .input(
       z.object({
-        openai: z.string(),
-        google: z.string(),
+        provider: z.enum(providers),
+        key: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const providerKeys = Object.entries(input) as [ApiProviderId, string][];
+      const updatedKey = await ctx.db.apiKey.upsert({
+        where: {
+          provider_userId: {
+            provider: input.provider,
+            userId: ctx.session.user.id,
+          },
+        },
+        update: {
+          key: encrypt(input.key),
+        },
+        create: {
+          key: encrypt(input.key),
+          provider: input.provider,
+          userId: ctx.session.user.id,
+        },
+      });
 
-      const updatedKeys = await Promise.all(
-        providerKeys.map(([provider, key]) => {
-          return ctx.db.apiKey.upsert({
-            where: {
-              provider_userId: { provider, userId: ctx.session.user.id },
-            },
-            update: {
-              key: encrypt(key),
-              provider,
-            },
-            create: {
-              key: encrypt(key),
-              provider,
-              userId: ctx.session.user.id,
-            },
-          });
-        })
-      );
+      return {
+        [input.provider]: decrypt(updatedKey.key),
+      } as { [key in typeof input.provider]: string };
+    }),
+  deleteApiKey: protectedProcedure
+    .input(z.object({ provider: z.enum(providers) }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.apiKey.delete({
+        where: {
+          provider_userId: {
+            provider: input.provider,
+            userId: ctx.session.user.id,
+          },
+        },
+      });
 
-      return updatedKeys.reduce((acc, key) => {
-        acc[key.provider] = decrypt(key.key);
-        return acc;
-      }, {} as Record<ApiProviderId, string>);
+      return {
+        [input.provider]: "",
+      } as { [key in typeof input.provider]: string };
     }),
 });
