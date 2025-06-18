@@ -18,8 +18,8 @@ import {
   type AnyModel,
 } from "~/shared/api-providers";
 import { Label } from "./ui/label";
-import { api } from "~/convex/_generated/api";
-import { type Id } from "~/convex/_generated/dataModel";
+import { api } from "@convex/_generated/api";
+import { type Id } from "@convex/_generated/dataModel";
 import { convertTiptapJsonToMarkdown } from "~/lib/markdown/parser";
 import { getApproximateTokens } from "~/lib/markdown/tokenizer";
 

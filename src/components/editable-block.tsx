@@ -2,8 +2,8 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import type { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import { useMutation } from "convex/react";
-import { api } from "~/convex/_generated/api";
-import type { Doc, Id } from "~/convex/_generated/dataModel";
+import { api } from "@convex/_generated/api";
+import type { Doc, Id } from "@convex/_generated/dataModel";
 import { Placeholder } from "@tiptap/extension-placeholder";
 import {
   useCallback,

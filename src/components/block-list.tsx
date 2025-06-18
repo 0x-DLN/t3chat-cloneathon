@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "convex/react";
 import { useCallback, useState, useRef } from "react";
-import { api } from "~/convex/_generated/api";
-import type { Id } from "~/convex/_generated/dataModel";
+import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
 import { EditableBlock } from "./editable-block";
 import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";

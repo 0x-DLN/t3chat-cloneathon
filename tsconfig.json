@@ -20,7 +20,7 @@
     ],
     "paths": {
       "~/*": ["./src/*"],
-      "~/convex/*": ["./convex/*"]
+      "@convex/*": ["./convex/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

@@ -11,7 +11,7 @@ export const env = createEnv({
     BETTER_AUTH_SECRET: z.string(),
     GOOGLE_CLIENT_ID: z.string(),
     GOOGLE_CLIENT_SECRET: z.string(),
-    CONVEX_DEPLOYMENT: z.string(),
+    CONVEX_DEPLOYMENT: z.string().optional(),
     CONVEX_SECRET: z.string(),
   },
   client: {

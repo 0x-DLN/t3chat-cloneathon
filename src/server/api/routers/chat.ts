@@ -1,8 +1,8 @@
-import { api } from "~/convex/_generated/api";
+import { api } from "@convex/_generated/api";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { z } from "zod/v4";
 import { env } from "~/env";
-import type { Id } from "~/convex/_generated/dataModel";
+import type { Id } from "@convex/_generated/dataModel";
 import { decrypt } from "~/lib/encryption";
 
 export const chatRouter = createTRPCRouter({
