@@ -16,6 +16,7 @@ import {
 import type { auth } from "~/lib/auth/server";
 import { Authenticated } from "convex/react";
 import ConversationsSidebar from "./conversations-sidebar";
+import CreateChatButton from "./create-chat-button";
 
 type User = NonNullable<
   Awaited<ReturnType<typeof auth.api.getSession>>
@@ -25,9 +26,9 @@ export function AppSidebar({ user }: { user: User }) {
   return (
     <Sidebar>
       <SidebarHeader>
-        <Button className="w-full items-center justify-center" size="lg">
-          New Chat
-        </Button>
+        <Authenticated>
+          <CreateChatButton />
+        </Authenticated>
       </SidebarHeader>
 
       <SidebarContent>

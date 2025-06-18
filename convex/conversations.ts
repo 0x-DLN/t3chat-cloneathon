@@ -26,6 +26,23 @@ export const create = internalMutation({
   },
 });
 
+export const createConversationUser = mutation({
+  handler: async (ctx) => {
+    const identity = await checkAuth(ctx.auth);
+
+    const conversationId = await ctx.db.insert("conversations", {
+      title: "New Conversation",
+      userId: identity.subject,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      model: "gpt-4o",
+      status: "idle",
+    });
+
+    return conversationId;
+  },
+});
+
 export const getUserConversations = query({
   handler: async (ctx) => {
     const identity = await checkAuth(ctx.auth);
