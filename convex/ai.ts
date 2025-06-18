@@ -10,6 +10,7 @@ import {
   convertTiptapJsonToMarkdown,
   markdownToTiptapJson,
 } from "~/lib/markdown/parser";
+import { SYSTEM_PROMPT } from "~/shared/api-providers";
 
 export const generateBlocks = mutation({
   args: {
@@ -52,7 +53,7 @@ export const generateBlocks = mutation({
     );
 
     const blocksToUse: CoreMessage[] = [
-      { role: "system", content: "You are a helpful assistant." },
+      { role: "system", content: SYSTEM_PROMPT },
       ...conversationBlocks
         .map((block) => ({
           role: block.author,
@@ -65,7 +66,7 @@ export const generateBlocks = mutation({
     if (blocksToUse[blocksToUse.length - 1].role === "assistant") {
       blocksToUse.push({
         role: "user",
-        content: "Continue",
+        content: "<EMPTY_MESSAGE>",
       });
     }
 
