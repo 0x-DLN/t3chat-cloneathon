@@ -4,7 +4,8 @@ import { z } from "zod/v4";
 import { env } from "~/env";
 import type { Id } from "@convex/_generated/dataModel";
 import { decrypt } from "~/lib/encryption";
-import { providers } from "~/shared/api-providers";
+import { providers, type ApiProviderId } from "~/shared/api-providers";
+import { TRPCError } from "@trpc/server";
 
 export const chatRouter = createTRPCRouter({
   sendMessage: protectedProcedure
@@ -45,7 +46,7 @@ export const chatRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const apiKey = await ctx.db.apiKey.findFirstOrThrow({
+      const apiKey = await ctx.db.apiKey.findFirst({
         where: {
           userId: ctx.session.user.id,
           provider: input.provider,
@@ -54,13 +55,31 @@ export const chatRouter = createTRPCRouter({
 
       const { model, provider, conversationId } = input;
 
+      const keyToUse = apiKey ? decrypt(apiKey.key) : getApiKey(provider);
+
       await ctx.convex.mutation(api.ai.generateBlocks, {
         model,
         provider,
-        apiKey: decrypt(apiKey.key),
+        apiKey: keyToUse,
         conversationId: conversationId as Id<"conversations">,
         userId: ctx.session.user.id,
         secret: env.CONVEX_SECRET,
       });
     }),
 });
+
+function getApiKey(provider: ApiProviderId) {
+  switch (provider) {
+    case "openrouter":
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Free tier OpenRouter API key is not supported",
+      });
+    case "openai":
+      return env.OPENAI_API_KEY;
+    case "google":
+      return env.GOOGLE_API_KEY;
+    default:
+      return "";
+  }
+}

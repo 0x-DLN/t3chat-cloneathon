@@ -13,6 +13,8 @@ export const env = createEnv({
     GOOGLE_CLIENT_SECRET: z.string(),
     CONVEX_DEPLOYMENT: z.string().optional(),
     CONVEX_SECRET: z.string(),
+    OPENAI_API_KEY: z.string(),
+    GOOGLE_API_KEY: z.string(),
   },
   client: {
     NEXT_PUBLIC_CONVEX_URL: z.string().min(1),
